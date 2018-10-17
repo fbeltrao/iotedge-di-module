@@ -9,7 +9,9 @@ namespace DIModule
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.Devices.Client;
+    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using Serilog;
 
     class Program
     {
@@ -17,8 +19,12 @@ namespace DIModule
 
         static void Main(string[] args)
         {
+            var configuration = new ConfigurationBuilder()
+                .AddEnvironmentVariables()
+                .Build();
+
             var serviceCollection = new ServiceCollection();
-            ConfigureServices(serviceCollection);
+            ConfigureServices(serviceCollection, configuration);
  
             // Build the our IServiceProvider and set our static reference to it
             ServiceProvider = serviceCollection.BuildServiceProvider();
@@ -36,10 +42,21 @@ namespace DIModule
             WhenCancelled(cts.Token).Wait();
         }
 
-        private static void ConfigureServices(ServiceCollection serviceCollection)
+        private static void ConfigureServices(ServiceCollection serviceCollection, IConfiguration configuration)
         {
             serviceCollection.AddModuleClient(new AmqpTransportSettings(TransportType.Amqp_Tcp_Only));
             serviceCollection.AddSingleton<MyModule>();
+
+            serviceCollection.AddLogging((loggingBuilder) => {
+               loggingBuilder.AddSerilog(); 
+            });
+
+
+            // Setup Serilog
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.Console()
+                .CreateLogger();
+            
         }
 
         /// <summary>

@@ -46,7 +46,7 @@
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "${MODULES.DIModule.amd64}",
+              "image": "${MODULES.DIModule.amd64.debug}",
               "createOptions": "{}"
             }
           }

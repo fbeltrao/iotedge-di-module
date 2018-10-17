@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Azure.Devices.Client;
 using Microsoft.Azure.Devices.Shared;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
 namespace DIModule
@@ -12,19 +13,21 @@ namespace DIModule
     public class MyModule 
     {
         private readonly IModuleClient moduleClient;
+        private readonly ILogger logger;
         int counter;
         double temperatureThreshold = 25;
         public double TemperatureThreshold => this.temperatureThreshold;
 
-        public MyModule(IModuleClient moduleClient)
+        public MyModule(IModuleClient moduleClient, ILogger<MyModule> logger)
         {
             this.moduleClient = moduleClient;
+            this.logger = logger;
         }
 
         public async Task InitializeAsync()
         {
             await this.moduleClient.OpenAsync();
-            Console.WriteLine("IoT Hub module client initialized.");
+            Console.WriteLine("My module client initialized.");
 
             // Resolve temperature thresold from module twin
             var moduleTwin = await this.moduleClient.GetTwinAsync();
@@ -33,7 +36,7 @@ namespace DIModule
                 var tempThreshold = moduleTwin.Properties.Desired["TemperatureThreshold"]?.ToString() ?? string.Empty;
                 if (double.TryParse(tempThreshold, out double newTemperatureThreshold))
                 {
-                    Console.WriteLine($"Using temperature threshold from module twin: {newTemperatureThreshold}");
+                    this.logger.LogInformation("Using temperature threshold from module twin: {newTemperatureThreshold}", newTemperatureThreshold);
                     this.temperatureThreshold = newTemperatureThreshold;
                 }
                 
@@ -54,7 +57,7 @@ namespace DIModule
                 var tempThreshold = desiredProperties["TemperatureThreshold"]?.ToString() ?? string.Empty;
                 if (double.TryParse(tempThreshold, out double newTemperatureThreshold))
                 {
-                    Console.WriteLine($"Temperature threshold updated from {this.temperatureThreshold} to {newTemperatureThreshold}");
+                    this.logger.LogInformation("Temperature threshold updated from {actualTemperature} to {newTemperature}", this.temperatureThreshold, newTemperatureThreshold);
                     this.temperatureThreshold = newTemperatureThreshold;
                 }            
             }
@@ -69,11 +72,19 @@ namespace DIModule
             byte[] messageBytes = message.GetBytes();
             string messageString = Encoding.UTF8.GetString(messageBytes);
             
-            Console.WriteLine($"Received message: {counterValue}, Body: [{messageString}]");
+            this.logger.LogDebug("Received message: {messageCounter}, {messageBody}", counterValue, messageString);
 
             if (!string.IsNullOrEmpty(messageString))
             {
-                var devicePayload = JsonConvert.DeserializeObject<DevicePayload>(messageString);
+                DevicePayload devicePayload = null;
+                try 
+                {
+                    devicePayload = JsonConvert.DeserializeObject<DevicePayload>(messageString);
+                }
+                catch (JsonReaderException)
+                {
+                }
+                
                 if (devicePayload != null && devicePayload.MachineTemperature >= this.temperatureThreshold)
                 {
                     var pipeMessage = new Message(messageBytes);
@@ -84,9 +95,10 @@ namespace DIModule
                     pipeMessage.Properties.Add("alert", "1");
 
                     await this.moduleClient.SendEventAsync("output1", pipeMessage);
-                    Console.WriteLine("Received message sent");
+                    this.logger.LogDebug("Received message sent");
                 }
             }
+
             return MessageResponse.Completed;
         }
     }

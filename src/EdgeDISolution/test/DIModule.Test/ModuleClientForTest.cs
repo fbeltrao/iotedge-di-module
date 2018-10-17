@@ -10,27 +10,28 @@ namespace DIModule.Test
     using Microsoft.Azure.Devices.Shared;
     using Newtonsoft.Json;
 
-    public class TestModuleClient : IModuleClient
+    // Module client implementation for testing purposes
+    public class ModuleClientForTest : IModuleClient
     {
         public virtual string ProductInfo { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
 
 
         // Route message to modules
-        public Message RouteMessage(string inputName, string message) => RouteMessage(inputName, new Message(UTF8Encoding.UTF8.GetBytes(message)));
+        public async Task<MessageResponse> RouteMessage(string inputName, string message) => await RouteMessage(inputName, new Message(UTF8Encoding.UTF8.GetBytes(message)));
 
         // Route message to modules
-        public Message RouteMessage(string inputName, object payload) => RouteMessage(inputName, new Message(UTF8Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(payload))));
+        public async Task<MessageResponse> RouteMessage(string inputName, object payload) => await RouteMessage(inputName, new Message(UTF8Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(payload))));
         
 
         // Route message to modules
-        public Message RouteMessage(string inputName, Message message)
+        public async Task<MessageResponse> RouteMessage(string inputName, Message message)
         {
             if (this.inputMessageHandlers.TryGetValue(inputName, out var t))
             {
-                t.Item1(message, t.Item2);
+                return await t.Item1(message, t.Item2);
             }
 
-            return message;
+            return MessageResponse.None;
         }
 
 
@@ -61,14 +62,14 @@ namespace DIModule.Test
         }
 
         Twin getTwinResult = new Twin();
-        public TestModuleClient SetGetTwinResult(Twin twin) 
+        public ModuleClientForTest SetGetTwinResult(Twin twin) 
         {
             this.getTwinResult = twin;
             return this;
 
         }
 
-        public TestModuleClient SetGetTwinResult(object desiredProperties) 
+        public ModuleClientForTest SetGetTwinResult(object desiredProperties) 
         {
             var twin = new Twin();
             twin.Properties.Desired = new TwinCollection(JsonConvert.SerializeObject(desiredProperties));
