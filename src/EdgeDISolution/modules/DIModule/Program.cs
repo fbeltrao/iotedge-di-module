@@ -38,14 +38,7 @@ namespace DIModule
 
         private static void ConfigureServices(ServiceCollection serviceCollection)
         {
-            serviceCollection.AddSingleton<IModuleClient>((sp) => {
-                var transportSettings = new AmqpTransportSettings(TransportType.Amqp_Tcp_Only);
-                ITransportSettings[] settings = { transportSettings };
-
-                var ioTHubModuleClient = ModuleClient.CreateFromEnvironmentAsync(settings).GetAwaiter().GetResult();
-                return new ModuleClientWrapper(ioTHubModuleClient);
-            });
-
+            serviceCollection.AddModuleClient(new AmqpTransportSettings(TransportType.Amqp_Tcp_Only));
             serviceCollection.AddSingleton<MyModule>();
         }
 
