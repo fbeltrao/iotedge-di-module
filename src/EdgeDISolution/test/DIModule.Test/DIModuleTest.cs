@@ -4,6 +4,7 @@ using Xunit;
 using System.Text;
 using System.Linq;
 using System.Threading.Tasks;
+using Moq;
 
 namespace DIModule.Test
 {
@@ -59,6 +60,40 @@ namespace DIModule.Test
 
             var actualOutputMessages = moduleClient.GetSentEvents("output1");
             Assert.Equal(0, actualOutputMessages.Count());
+        }
+
+        [Fact]
+        public async Task When_Twin_Has_No_Value_Temperature_Threshold_Is_Default()
+        {
+            var moduleClient = new TestModuleClient();
+            var module = new MyModule(moduleClient);
+
+            await module.InitializeAsync();
+            Assert.Equal(25d, module.TemperatureThreshold);
+        }
+
+        [Fact]
+        public async Task When_Twin_Has_Value_Temperature_Threshold_Is_Initialized()
+        {
+            var moduleClient = new TestModuleClient()
+                .SetGetTwinResult(new { TemperatureThreshold = 45.0 });
+
+            var module = new MyModule(moduleClient);
+
+            await module.InitializeAsync();
+            Assert.Equal(45d, module.TemperatureThreshold);
+        }
+
+        [Fact]
+        public async Task When_Twin_Is_Update_With_New_Threshold_Current_State_Is_Updated()
+        {
+            var moduleClient = new TestModuleClient();
+            var module = new MyModule(moduleClient);
+
+            await module.InitializeAsync();
+
+            await moduleClient.TriggerDesiredPropertyChange(new { TemperatureThreshold = 100.0 });
+            Assert.Equal(100.0, module.TemperatureThreshold);
         }
     }
 }

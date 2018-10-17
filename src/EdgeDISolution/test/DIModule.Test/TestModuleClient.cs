@@ -12,7 +12,7 @@ namespace DIModule.Test
 
     public class TestModuleClient : IModuleClient
     {
-        public string ProductInfo { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
+        public virtual string ProductInfo { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
 
 
         // Route message to modules
@@ -35,60 +35,70 @@ namespace DIModule.Test
 
 
 
-        public int DiagnosticSamplingPercentage { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
-        public uint OperationTimeoutInMilliseconds { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
+        public virtual int DiagnosticSamplingPercentage { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
+        public virtual uint OperationTimeoutInMilliseconds { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
 
-        public Task AbandonAsync(Message message)
+        public virtual Task AbandonAsync(Message message)
         {
             throw new System.NotImplementedException();
         }
 
-        public Task AbandonAsync(string lockToken)
+        public virtual Task AbandonAsync(string lockToken)
         {
             throw new System.NotImplementedException();
         }
 
-        public Task CloseAsync()
+        public virtual Task CloseAsync() => Task.FromResult(0);
+
+        public virtual Task CompleteAsync(Message message)
         {
             throw new System.NotImplementedException();
         }
 
-        public Task CompleteAsync(Message message)
+        public virtual Task CompleteAsync(string lockToken)
         {
             throw new System.NotImplementedException();
         }
 
-        public Task CompleteAsync(string lockToken)
+        Twin getTwinResult = new Twin();
+        public TestModuleClient SetGetTwinResult(Twin twin) 
+        {
+            this.getTwinResult = twin;
+            return this;
+
+        }
+
+        public TestModuleClient SetGetTwinResult(object desiredProperties) 
+        {
+            var twin = new Twin();
+            twin.Properties.Desired = new TwinCollection(JsonConvert.SerializeObject(desiredProperties));
+            this.getTwinResult = twin;
+            return this;
+        }
+
+        public virtual Task<Twin> GetTwinAsync() => Task.FromResult(getTwinResult);
+
+        public virtual Task<MethodResponse> InvokeMethodAsync(string deviceId, string moduleId, MethodRequest methodRequest, CancellationToken cancellationToken)
         {
             throw new System.NotImplementedException();
         }
 
-        public Task<Twin> GetTwinAsync()
+        public virtual Task<MethodResponse> InvokeMethodAsync(string deviceId, string moduleId, MethodRequest methodRequest)
         {
             throw new System.NotImplementedException();
         }
 
-        public Task<MethodResponse> InvokeMethodAsync(string deviceId, string moduleId, MethodRequest methodRequest, CancellationToken cancellationToken)
+        public virtual Task<MethodResponse> InvokeMethodAsync(string deviceId, MethodRequest methodRequest, CancellationToken cancellationToken)
         {
             throw new System.NotImplementedException();
         }
 
-        public Task<MethodResponse> InvokeMethodAsync(string deviceId, string moduleId, MethodRequest methodRequest)
+        public virtual Task<MethodResponse> InvokeMethodAsync(string deviceId, MethodRequest methodRequest)
         {
             throw new System.NotImplementedException();
         }
 
-        public Task<MethodResponse> InvokeMethodAsync(string deviceId, MethodRequest methodRequest, CancellationToken cancellationToken)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public Task<MethodResponse> InvokeMethodAsync(string deviceId, MethodRequest methodRequest)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public Task OpenAsync() => Task.FromResult(0);
+        public virtual Task OpenAsync() => Task.FromResult(0);
 
         Dictionary<string, List<Message>> sentEventCollection = new Dictionary<string, List<Message>>();
 
@@ -99,7 +109,7 @@ namespace DIModule.Test
             return new Message[0];
         }
 
-        public Task SendEventAsync(string outputName, Message message)
+        public virtual Task SendEventAsync(string outputName, Message message)
         {
             if (!sentEventCollection.TryGetValue(outputName, out var list))
             {
@@ -111,9 +121,9 @@ namespace DIModule.Test
             return Task.FromResult(0);
         }
 
-        public Task SendEventAsync(Message message) => SendEventAsync(string.Empty, message);
+        public virtual Task SendEventAsync(Message message) => SendEventAsync(string.Empty, message);
 
-        public Task SendEventBatchAsync(string outputName, IEnumerable<Message> messages)
+        public virtual Task SendEventBatchAsync(string outputName, IEnumerable<Message> messages)
         {
             if (!sentEventCollection.TryGetValue(outputName, out var list))
             {
@@ -125,46 +135,64 @@ namespace DIModule.Test
             return Task.FromResult(0);        
         }
 
-        public Task SendEventBatchAsync(IEnumerable<Message> messages) => SendEventBatchAsync(string.Empty, messages);
+        public virtual Task SendEventBatchAsync(IEnumerable<Message> messages) => SendEventBatchAsync(string.Empty, messages);
 
-        public void SetConnectionStatusChangesHandler(ConnectionStatusChangesHandler statusChangesHandler)
+        public virtual void SetConnectionStatusChangesHandler(ConnectionStatusChangesHandler statusChangesHandler)
         {
             throw new System.NotImplementedException();
         }
 
-        public Task SetDesiredPropertyUpdateCallbackAsync(DesiredPropertyUpdateCallback callback, object userContext)
+        DesiredPropertyUpdateCallback propertyUpdateCallback;
+        object propertyUpdateCallbackUserContext;
+        public virtual Task SetDesiredPropertyUpdateCallbackAsync(DesiredPropertyUpdateCallback callback, object userContext)
         {
-            throw new System.NotImplementedException();
+            this.propertyUpdateCallback = callback;
+            this.propertyUpdateCallbackUserContext = userContext;
+            return Task.FromResult(0);
+        }
+
+        // Test method to trigger twin desired property change
+        public async Task TriggerDesiredPropertyChange(object value)
+        {
+            var json = JsonConvert.SerializeObject(value);
+            await TriggerDesiredPropertyChange(new TwinCollection(json));
+        }
+
+        // Test method to trigger twin desired property change
+        public async Task TriggerDesiredPropertyChange(TwinCollection value)
+        {
+            if (this.propertyUpdateCallback != null)
+                await this.propertyUpdateCallback(value, this.propertyUpdateCallbackUserContext);
         }
 
         Dictionary<string, Tuple<MessageHandler, object>> inputMessageHandlers = new Dictionary<string, Tuple<MessageHandler, object>>();
-        public Task SetInputMessageHandlerAsync(string inputName, MessageHandler messageHandler, object userContext)
+        public virtual Task SetInputMessageHandlerAsync(string inputName, MessageHandler messageHandler, object userContext)
         {
             inputMessageHandlers[inputName] = new Tuple<MessageHandler, object>(messageHandler, userContext);
             return Task.FromResult(0);
         }
 
-        public Task SetMessageHandlerAsync(MessageHandler messageHandler, object userContext)
+        public virtual Task SetMessageHandlerAsync(MessageHandler messageHandler, object userContext)
         {
             throw new System.NotImplementedException();
         }
 
-        public Task SetMethodDefaultHandlerAsync(MethodCallback methodHandler, object userContext)
+        public virtual Task SetMethodDefaultHandlerAsync(MethodCallback methodHandler, object userContext)
         {
             throw new System.NotImplementedException();
         }
 
-        public Task SetMethodHandlerAsync(string methodName, MethodCallback methodHandler, object userContext)
+        public virtual Task SetMethodHandlerAsync(string methodName, MethodCallback methodHandler, object userContext)
         {
             throw new System.NotImplementedException();
         }
 
-        public void SetRetryPolicy(IRetryPolicy retryPolicy)
+        public virtual void SetRetryPolicy(IRetryPolicy retryPolicy)
         {
             throw new System.NotImplementedException();
         }
 
-        public Task UpdateReportedPropertiesAsync(TwinCollection reportedProperties)
+        public virtual Task UpdateReportedPropertiesAsync(TwinCollection reportedProperties)
         {
             throw new System.NotImplementedException();
         }

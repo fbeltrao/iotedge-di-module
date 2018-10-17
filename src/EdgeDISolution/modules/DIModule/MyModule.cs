@@ -3,6 +3,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Azure.Devices.Client;
+using Microsoft.Azure.Devices.Shared;
 using Newtonsoft.Json;
 
 namespace DIModule
@@ -13,6 +14,7 @@ namespace DIModule
         private readonly IModuleClient moduleClient;
         int counter;
         double temperatureThreshold = 25;
+        public double TemperatureThreshold => this.temperatureThreshold;
 
         public MyModule(IModuleClient moduleClient)
         {
@@ -24,8 +26,40 @@ namespace DIModule
             await this.moduleClient.OpenAsync();
             Console.WriteLine("IoT Hub module client initialized.");
 
+            // Resolve temperature thresold from module twin
+            var moduleTwin = await this.moduleClient.GetTwinAsync();
+            if (moduleTwin.Properties.Desired != null && moduleTwin.Properties.Desired.Contains("TemperatureThreshold")) 
+            {
+                var tempThreshold = moduleTwin.Properties.Desired["TemperatureThreshold"]?.ToString() ?? string.Empty;
+                if (double.TryParse(tempThreshold, out double newTemperatureThreshold))
+                {
+                    Console.WriteLine($"Using temperature threshold from module twin: {newTemperatureThreshold}");
+                    this.temperatureThreshold = newTemperatureThreshold;
+                }
+                
+            } 
+
+            // Register callback for twin changes
+            await this.moduleClient.SetDesiredPropertyUpdateCallbackAsync(OnDesiredPropertyChanged, null);
+           
+
             // Register callback to be called when a message is received by the module
             await this.moduleClient.SetInputMessageHandlerAsync("input1", PipeMessage, null);
+        }
+
+        private Task OnDesiredPropertyChanged(TwinCollection desiredProperties, object userContext)
+        {
+            if (desiredProperties != null && desiredProperties.Contains("TemperatureThreshold")) 
+            {
+                var tempThreshold = desiredProperties["TemperatureThreshold"]?.ToString() ?? string.Empty;
+                if (double.TryParse(tempThreshold, out double newTemperatureThreshold))
+                {
+                    Console.WriteLine($"Temperature threshold updated from {this.temperatureThreshold} to {newTemperatureThreshold}");
+                    this.temperatureThreshold = newTemperatureThreshold;
+                }            
+            }
+
+            return Task.FromResult(0); 
         }
 
         private async Task<MessageResponse> PipeMessage(Message message, object userContext)
