@@ -58,7 +58,7 @@ public class MyModule
     }
 }
 
-public inteface IModuleClient : IDisposable
+public interface IModuleClient : IDisposable
 {
     ...
     Task<Twin> GetTwinAsync();
