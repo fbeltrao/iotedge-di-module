@@ -1,6 +1,6 @@
 # Dependency Injection in IoT Edge Module
 
-[IoT Edge](https://docs.microsoft.com/en-us/azure/iot-edge/about-iot-edge) is a Azure service that enables building IoT projects where smart capabilities are available at the edge. One of the capabilities is to provide custom code packaged into IoT Edge modules which execute in field devices. IoT Edge modules can be implemented in multiple languages (C#, Python, JavaScript, Java, C).
+[IoT Edge](https://docs.microsoft.com/en-us/azure/iot-edge/about-iot-edge) is an Azure service that enables building IoT projects where smart capabilities are available at the edge. One of the capabilities is to provide custom code packaged into IoT Edge modules which execute in field devices. IoT Edge modules can be implemented in multiple languages (C#, Python, JavaScript, Java, C).
 
 This sample implementation illustrates a way to add dependency injection (DI) to an C# IoT Edge module. DI improves the code testability and maintainability by removing strict dependencies.
 
@@ -34,7 +34,7 @@ static void Main(string[] args)
     WhenCancelled(cts.Token).Wait();
 }
 
- private static void ConfigureServices(ServiceCollection serviceCollection)
+private static void ConfigureServices(ServiceCollection serviceCollection)
 {
     serviceCollection.AddModuleClient(new AmqpTransportSettings(TransportType.Amqp_Tcp_Only));
     serviceCollection.AddSingleton<MyModule>();
