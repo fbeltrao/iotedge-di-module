@@ -49,9 +49,7 @@ namespace DIModule.Test
             Assert.Single(actualOutputMessages);
             Assert.True(actualOutputMessages.First().Properties.ContainsKey("alert"), "Ensure 'alert' property was created");
             Assert.True(actualOutputMessages.First().Properties.ContainsKey("MyProperty"), "Ensure 'MyProperty' property was copied");
-            Assert.Equal("MyValue", actualOutputMessages.First().Properties["MyProperty"]);
-
-        
+            Assert.Equal("MyValue", actualOutputMessages.First().Properties["MyProperty"]);       
         }
 
         [Fact]
