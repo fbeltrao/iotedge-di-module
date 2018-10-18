@@ -13,7 +13,7 @@ namespace DIModule
                 ITransportSettings[] settings = { transportSettings };
 
                 var ioTHubModuleClient = ModuleClient.CreateFromEnvironmentAsync(settings).GetAwaiter().GetResult();
-                return new ModuleClientWrapper(ioTHubModuleClient);
+                return new ModuleClientAdapter(ioTHubModuleClient);
             });
 
             return serviceCollection;

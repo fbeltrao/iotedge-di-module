@@ -85,7 +85,7 @@ namespace DIModule
                 {
                 }
                 
-                if (devicePayload != null && devicePayload.MachineTemperature >= this.temperatureThreshold)
+                if (devicePayload != null && devicePayload.Machine != null && devicePayload.Machine.Temperature >= this.temperatureThreshold)
                 {
                     var pipeMessage = new Message(messageBytes);
                     foreach (var prop in message.Properties)

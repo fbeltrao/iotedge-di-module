@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28124.53
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{34036844-64E7-43A5-9151-4AD90E180989}") = "AzureIoTEdgeApp", "src\EdgeDISolution\AzureIoTEdgeApp\AzureIoTEdgeApp.iotedgeproj", "{7CEB1BAE-A0E0-4825-A9CD-45891A9C5483}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DIModule", "src\EdgeDISolution\modules\DIModule\DIModule.csproj", "{D8CF2959-0AF4-429C-9FDB-149DDB15A183}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7CEB1BAE-A0E0-4825-A9CD-45891A9C5483}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7CEB1BAE-A0E0-4825-A9CD-45891A9C5483}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7CEB1BAE-A0E0-4825-A9CD-45891A9C5483}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7CEB1BAE-A0E0-4825-A9CD-45891A9C5483}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D8CF2959-0AF4-429C-9FDB-149DDB15A183}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D8CF2959-0AF4-429C-9FDB-149DDB15A183}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D8CF2959-0AF4-429C-9FDB-149DDB15A183}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D8CF2959-0AF4-429C-9FDB-149DDB15A183}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {29795FBE-0A6C-4FFC-82FF-2F10AF13B78E}
+	EndGlobalSection
+EndGlobal

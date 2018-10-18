@@ -7,20 +7,41 @@ using Microsoft.Azure.Devices.Shared;
 
 namespace DIModule
 {
-
-    public class ModuleClientWrapper : IModuleClient
+    /// <summary>
+    /// Module client adapter
+    /// </summary>
+    public class ModuleClientAdapter : IModuleClient
     {
         private readonly ModuleClient moduleClient;
 
-        public ModuleClientWrapper(ModuleClient moduleClient)
+        /// <summary>
+        /// Creates a new instance of <see cref="ModuleClientAdapter"/>
+        /// </summary>
+        /// <param name="moduleClient"></param>
+        public ModuleClientAdapter(ModuleClient moduleClient)
         {
             this.moduleClient = moduleClient ?? throw new System.ArgumentNullException(nameof(moduleClient));
         }
 
-        public string ProductInfo { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
-        public int DiagnosticSamplingPercentage { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
-        public uint OperationTimeoutInMilliseconds { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
+        public string ProductInfo
+        {
+            get { return this.moduleClient.ProductInfo; }
+            set { this.moduleClient.ProductInfo = value; }
+        }
 
+
+
+        public int DiagnosticSamplingPercentage
+        {
+            get { return this.moduleClient.DiagnosticSamplingPercentage; }
+            set { this.moduleClient.DiagnosticSamplingPercentage = value; }
+        }
+
+        public uint OperationTimeoutInMilliseconds
+        {
+            get { return this.moduleClient.OperationTimeoutInMilliseconds; }
+            set { this.moduleClient.OperationTimeoutInMilliseconds = value; }
+        }
         public Task AbandonAsync(Message message) => this.moduleClient.AbandonAsync(message);
 
         public Task AbandonAsync(string lockToken) => this.moduleClient.AbandonAsync(lockToken);

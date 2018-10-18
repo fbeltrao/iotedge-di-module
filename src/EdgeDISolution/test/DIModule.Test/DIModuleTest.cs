@@ -27,10 +27,10 @@ namespace DIModule.Test
             var module = new MyModule(moduleClient, this.logger);
             await module.InitializeAsync();
 
-            Assert.Equal(MessageResponse.Completed, await moduleClient.RouteMessage("input1", new DevicePayload { MachineTemperature = 30 } ));
+            Assert.Equal(MessageResponse.Completed, await moduleClient.RouteMessage("input1", new DevicePayload { Machine = new MachineTelemetry { Temperature = 30 } } ));
 
             var actualOutputMessages = moduleClient.GetSentEvents("output1");
-            Assert.Equal(1, actualOutputMessages.Count());
+            Assert.Single(actualOutputMessages);
             Assert.True(actualOutputMessages.First().Properties.ContainsKey("alert"), "Ensure 'alert' property was created");
         }
 
@@ -41,12 +41,12 @@ namespace DIModule.Test
             var module = new MyModule(moduleClient, this.logger);
             await module.InitializeAsync();
 
-            var message = new Message(UTF8Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(new DevicePayload { MachineTemperature = 30 })));
+            var message = new Message(UTF8Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(new DevicePayload { Machine = new MachineTelemetry { Temperature = 30 } })));
             message.Properties.Add("MyProperty", "MyValue");
             Assert.Equal(MessageResponse.Completed, await moduleClient.RouteMessage("input1", message));
 
             var actualOutputMessages = moduleClient.GetSentEvents("output1");
-            Assert.Equal(1, actualOutputMessages.Count());
+            Assert.Single(actualOutputMessages);
             Assert.True(actualOutputMessages.First().Properties.ContainsKey("alert"), "Ensure 'alert' property was created");
             Assert.True(actualOutputMessages.First().Properties.ContainsKey("MyProperty"), "Ensure 'MyProperty' property was copied");
             Assert.Equal("MyValue", actualOutputMessages.First().Properties["MyProperty"]);
@@ -61,10 +61,10 @@ namespace DIModule.Test
             var module = new MyModule(moduleClient, this.logger);
             await module.InitializeAsync();
 
-            Assert.Equal(MessageResponse.Completed, await moduleClient.RouteMessage("input1", new DevicePayload { MachineTemperature = 20 } ));
+            Assert.Equal(MessageResponse.Completed, await moduleClient.RouteMessage("input1", new DevicePayload { Machine = new MachineTelemetry { Temperature = 20 }  } ));
 
             var actualOutputMessages = moduleClient.GetSentEvents("output1");
-            Assert.Equal(0, actualOutputMessages.Count());
+            Assert.Empty(actualOutputMessages);
         }
 
         [Fact]
@@ -77,7 +77,7 @@ namespace DIModule.Test
             Assert.Equal(MessageResponse.Completed, await moduleClient.RouteMessage("input1", new { wrongProperty = 30 } ));
 
             var actualOutputMessages = moduleClient.GetSentEvents("output1");
-            Assert.Equal(0, actualOutputMessages.Count());
+            Assert.Empty(actualOutputMessages);
         }
 
         [Fact]
@@ -90,7 +90,7 @@ namespace DIModule.Test
             Assert.Equal(MessageResponse.Completed, await moduleClient.RouteMessage("input1", "{ 'MachineTemperature': '30"));
 
             var actualOutputMessages = moduleClient.GetSentEvents("output1");
-            Assert.Equal(0, actualOutputMessages.Count());
+            Assert.Empty(actualOutputMessages);
         }
 
         [Fact]

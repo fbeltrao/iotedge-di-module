@@ -1,11 +1,7 @@
 namespace DIModule
 {
     using System;
-    using System.IO;
-    using System.Runtime.InteropServices;
     using System.Runtime.Loader;
-    using System.Security.Cryptography.X509Certificates;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.Devices.Client;
@@ -47,16 +43,20 @@ namespace DIModule
             serviceCollection.AddModuleClient(new AmqpTransportSettings(TransportType.Amqp_Tcp_Only));
             serviceCollection.AddSingleton<MyModule>();
 
-            serviceCollection.AddLogging((loggingBuilder) => {
-               loggingBuilder.AddSerilog(); 
+            serviceCollection.AddLogging((builder) => {
+                builder.AddSerilog();
             });
 
 
             // Setup Serilog
             Log.Logger = new LoggerConfiguration()
-                .WriteTo.Console()
+                .MinimumLevel.Verbose()
+#if DEBUG
+                .WriteTo.Console(restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Verbose)
+#else
+                .WriteTo.Console(restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Information)
+#endif
                 .CreateLogger();
-            
         }
 
         /// <summary>
